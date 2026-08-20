@@ -72,15 +72,18 @@ body {
     align-items: center;
 }
 
+/* Фиксируем фрейм, чтобы страница не скакала */
 .character-container {
     flex: 1;
     display: flex;
     justify-content: center;
-}
+    align-items: center;
+    min-height: 650px; /* Фиксированная минимальная высота */
 
 .model-img {
-    max-height: 80vh;
+    max-height: 650px; /* Ограничиваем высоту */
     object-fit: contain;
+    transition: opacity 0.2s ease-in-out; /* Плавное исчезновение */
 }
 
 .info-container {
@@ -103,9 +106,9 @@ body {
     background-color: var(--accent-color);
 }
 
-/* Логотип в шапке */
+/* Логотип в шапке (увеличен в 2 раза) */
 .logo img {
-    height: 40px;
+    height: 80px; 
     width: auto;
     object-fit: contain;
 }
@@ -167,4 +170,79 @@ body {
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 20px;
+}
+
+/* Новая галерея и ссылки */
+.gallery-subtitle {
+    width: 100%;
+    text-align: center;
+    font-size: 1.5em;
+    margin: 40px 0 20px 0;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.art-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.artist-link {
+    color: var(--text-color);
+    text-decoration: none;
+    background-color: #2a2a35;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.artist-link:hover {
+    background-color: var(--accent-color);
+}
+
+/* Модальное окно (Lightbox) */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.85); /* Полупрозрачный темный фон */
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90vh;
+    margin-top: 5vh;
+    object-fit: contain;
+    animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.8); opacity: 0; } 
+    to { transform: scale(1); opacity: 1; }
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    color: #f1f1f1;
+    font-size: 45px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.close-modal:hover {
+    color: var(--accent-color);
 }
