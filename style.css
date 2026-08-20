@@ -102,3 +102,69 @@ body {
 .btn:hover {
     background-color: var(--accent-color);
 }
+
+/* Логотип в шапке */
+.logo img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Стили для секций контента */
+.content-section {
+    padding: 60px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Баннеры секций */
+.section-banner {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.section-content {
+    width: 100%;
+    background: #1a1a24;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* Сетка для галереи артов */
+.art-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.art-grid img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s;
+    cursor: pointer;
+}
+
+.art-grid img:hover {
+    transform: scale(1.03);
+}
+
+/* Активная кнопка переключателя */
+.btn.active {
+    background-color: var(--accent-color);
+}
+.theme-switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
