@@ -27,14 +27,12 @@
     <!-- Главный экран и Переключатель образов -->
     <section class="hero">
         <div class="character-container">
-            <!-- По умолчанию стоит стандартная стримерская модель -->
             <img src="images/vtuber-model.png" alt="Xwaran Model" id="main-model" class="model-img">
         </div>
         <div class="info-container">
             <h1>Привет, я Хворь!</h1>
             <p>Добро пожаловать в мой уютный уголок. Выбери образ:</p>
             
-            <!-- Кнопки для переключения PNG моделек -->
             <div class="theme-switcher" id="model-switcher">
                 <button class="btn active" data-src="images/vtuber-model.png">Стрим-модель</button>
                 <button class="btn" data-src="images/model-png.png">Стандарт ПНГ</button>
@@ -60,7 +58,7 @@
     <section id="streams" class="content-section">
         <img src="images/streams.jpeg" alt="Streams Banner" class="section-banner">
         <div class="section-content">
-            <p>Место под динамическое расписание (потом подключим базу данных Firebase).</p>
+            <p>Место под динамическое расписание (Firebase).</p>
         </div>
     </section>
 
@@ -102,7 +100,6 @@
         <!-- Раздел 2: Арты от чатика -->
         <h3 class="gallery-subtitle">Арты от чатика</h3>
         <div class="art-grid">
-            <!-- Сюда добавляй картинки из новой папки images_fan -->
             <img src="images_fan/fanart1.png" alt="Фапарт 1" onerror="this.style.display='none'"> 
             <img src="images_fan/fanart2.png" alt="Фапарт 2" onerror="this.style.display='none'">
         </div>
@@ -111,12 +108,13 @@
         <h3 class="gallery-subtitle">Арты художников</h3>
         <div class="art-grid">
             <div class="art-card">
-                <img src="images_art/art.png" alt="Art by Artist">
-                <a href="https://vk.com/artist_link" target="_blank" class="artist-link">🎨 Автор: @ArtistName</a>
+                <!-- Временно поставил заглушки из папки images, пока не закинешь в images_art -->
+                <img src="images/art.png" alt="Art by Artist">
+                <a href="#" target="_blank" class="artist-link">🎨 Автор: @ArtistName</a>
             </div>
             <div class="art-card">
-                <img src="images_art/bath.png" alt="Art Bath">
-                <a href="https://t.me/artist_link" target="_blank" class="artist-link">🎨 Автор: @ArtistName</a>
+                <img src="images/bath.png" alt="Art Bath">
+                <a href="#" target="_blank" class="artist-link">🎨 Автор: @ArtistName</a>
             </div>
         </div>
     </section>
@@ -127,11 +125,7 @@
         <img class="modal-content" id="expanded-img">
     </div>
 
-    <script src="main.js"></script>
-</body>
-</html>
-
-    <!-- ПОДКЛЮЧАЕМ СКРИПТ (Чтобы кнопки работали) -->
+    <!-- Скрипты -->
     <script src="main.js"></script>
 </body>
 </html>
