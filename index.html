@@ -1,105 +1,42 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xwaran (Хворь) - Официальный сайт</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- Навигация -->
-    <header class="navbar">
-        <div class="logo">
-            <img src="images/logo.png" alt="Xwaran Logo">
+<!-- Галерея Артов -->
+    <section id="gallery" class="content-section">
+        <h2 style="text-align: center; font-size: 2em; margin-bottom: 10px;">ГАЛЕРЕЯ</h2>
+        
+        <!-- Раздел 1: Арты от Хвори -->
+        <h3 class="gallery-subtitle">Арты от Хвори</h3>
+        <div class="art-grid">
+            <img src="images/stone.png" alt="Art Stone">
+            <img src="images/night.png" alt="Art Night">
         </div>
-        <nav>
-            <a href="#info">Инфо</a>
-            <a href="#streams">Стримы</a>
-            <a href="#events">Ивенты</a>
-            <a href="#rules">Правила</a>
-            <a href="#roles">Роли</a>
-        </nav>
-        <div class="status-badge offline" id="stream-status">
-            <span class="indicator"></span> ОФФЛАЙН
-        </div>
-    </header>
 
-    <!-- Главный экран и Переключатель образов -->
-    <section class="hero">
-        <div class="character-container">
-            <!-- По умолчанию стоит стандартная стримерская модель -->
-            <img src="images/vtuber-model.png" alt="Xwaran Model" id="main-model" class="model-img">
+        <!-- Раздел 2: Арты от чатика -->
+        <h3 class="gallery-subtitle">Арты от чатика</h3>
+        <div class="art-grid">
+            <!-- Сюда добавляй картинки из новой папки images_fan -->
+            <img src="images_fan/fanart1.png" alt="Фапарт 1" onerror="this.style.display='none'"> 
+            <img src="images_fan/fanart2.png" alt="Фапарт 2" onerror="this.style.display='none'">
         </div>
-        <div class="info-container">
-            <h1>Привет, я Хворь!</h1>
-            <p>Добро пожаловать в мой уютный уголок. Выбери образ:</p>
-            
-            <!-- Кнопки для переключения PNG моделек -->
-            <div class="theme-switcher" id="model-switcher">
-                <button class="btn active" data-src="images/vtuber-model.png">Стрим-модель</button>
-                <button class="btn" data-src="images/model-png.png">Стандарт ПНГ</button>
-                <button class="btn" data-src="images/dress.png">В платье</button>
-                <button class="btn" data-src="images/red-model.png">Шикарная</button>
-                <button class="btn" data-src="images/vtuber-sleep.png">Пижамка</button>
-                <button class="btn" data-src="images/chibi.png">Чиби</button>
-                <button class="btn" data-src="images/art-povyazka.png">С повязкой</button>
-                <button class="btn" data-src="images/art-avva.png">Необычная</button>
+
+        <!-- Раздел 3: Арты художников -->
+        <h3 class="gallery-subtitle">Арты художников</h3>
+        <div class="art-grid">
+            <div class="art-card">
+                <img src="images_art/art.png" alt="Art by Artist">
+                <a href="https://vk.com/artist_link" target="_blank" class="artist-link">🎨 Автор: @ArtistName</a>
+            </div>
+            <div class="art-card">
+                <img src="images_art/bath.png" alt="Art Bath">
+                <a href="https://t.me/artist_link" target="_blank" class="artist-link">🎨 Автор: @ArtistName</a>
             </div>
         </div>
     </section>
 
-    <!-- Секция Инфо -->
-    <section id="info" class="content-section">
-        <img src="images/info.jpeg" alt="Info Banner" class="section-banner">
-        <div class="section-content">
-            <p>Здесь мы потом разместим твой лор, реф-лист и основные факты.</p>
-        </div>
-    </section>
+    <!-- Модальное окно для увеличения картинок -->
+    <div id="image-modal" class="modal">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="expanded-img">
+    </div>
 
-    <!-- Секция Стримы (Календарь) -->
-    <section id="streams" class="content-section">
-        <img src="images/streams.jpeg" alt="Streams Banner" class="section-banner">
-        <div class="section-content">
-            <p>Место под динамическое расписание (потом подключим базу данных Firebase).</p>
-        </div>
-    </section>
-
-    <!-- Секция Ивенты -->
-    <section id="events" class="content-section">
-        <img src="images/events.jpeg" alt="Events Banner" class="section-banner">
-        <div class="section-content">
-            <p>Розыгрыши, сабголы и интерактивы.</p>
-        </div>
-    </section>
-
-    <!-- Секция Правила -->
-    <section id="rules" class="content-section">
-        <img src="images/rules.jpeg" alt="Rules Banner" class="section-banner">
-        <div class="section-content">
-            <p>Здесь будут правила поведения на стримах и в чате.</p>
-        </div>
-    </section>
-
-    <!-- Секция Роли -->
-    <section id="roles" class="content-section">
-        <img src="images/roles.jpeg" alt="Roles Banner" class="section-banner">
-        <div class="section-content">
-            <p>Информация для модераторов, випов, сабов и топ-донатеров.</p>
-        </div>
-    </section>
-
-    <!-- Галерея Артов -->
-    <section id="gallery" class="content-section">
-        <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;">ГАЛЕРЕЯ</h2>
-        <div class="art-grid">
-            <img src="images/stone.png" alt="Art 1">
-            <img src="images/night.png" alt="Art 2">
-            <img src="images/art.png" alt="Art 3">
-            <img src="images/bath.png" alt="Art 4">
-        </div>
-    </section>
-
-    <!-- ПОДКЛЮЧАЕМ СКРИПТ (Чтобы кнопки работали) -->
     <script src="main.js"></script>
 </body>
 </html>
