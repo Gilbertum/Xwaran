@@ -34,9 +34,9 @@ body {
     color: var(--accent-color);
 }
 
-/* Логотип 30px */
+/* Увеличенный логотип */
 .logo img {
-    height: 30px; 
+    height: 80px; 
     width: auto;
     object-fit: contain;
 }
@@ -70,26 +70,33 @@ body {
     min-height: 90vh;
     padding: 50px;
     align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-/* Фиксируем фрейм, чтобы страница не скакала */
+/* Жесткая фиксация левого блока (картинки) на 50% ширины */
 .character-container {
-    flex: 1;
+    flex: 0 0 50%; 
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 650px; 
+    height: 650px; 
+    overflow: hidden; 
 }
 
+/* Картинка никогда не вылезет за пределы своего контейнера */
 .model-img {
-    max-height: 650px;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     transition: opacity 0.2s ease-in-out;
 }
 
+/* Жесткая фиксация правого блока (текста и кнопок) на 50% ширины */
 .info-container {
-    flex: 1;
+    flex: 0 0 50%; 
     padding: 40px;
+    box-sizing: border-box;
 }
 
 .theme-switcher {
@@ -159,7 +166,7 @@ body {
 
 .art-grid img {
     width: 100%;
-    height: 100%;
+    height: 250px;
     object-fit: cover;
     border-radius: 8px;
     transition: transform 0.3s;
