@@ -1,9 +1,6 @@
-// main.js
-
-// Имитация проверки статуса стрима
-const isLive = false; // Поменяйте на true, чтобы увидеть статус "ОНЛАЙН"
-
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. Имитация статуса онлайна
+    const isLive = false; 
     const statusBadge = document.getElementById('stream-status');
     
     if (isLive) {
@@ -12,17 +9,26 @@ document.addEventListener("DOMContentLoaded", () => {
         statusBadge.innerHTML = '<span class="indicator"></span> ОНЛАЙН (LIVE)';
     }
 
-    // Логика переключения образов витубера
-    const themeButtons = document.querySelectorAll('.theme-switcher .btn');
-    themeButtons.forEach(button => {
+    // 2. Переключение образов Хвори
+    const mainModel = document.getElementById('main-model');
+    const modelButtons = document.querySelectorAll('#model-switcher .btn');
+
+    modelButtons.forEach(button => {
         button.addEventListener('click', (e) => {
-            // Убираем активный класс у всех кнопок
-            themeButtons.forEach(btn => btn.style.backgroundColor = 'transparent');
-            // Добавляем активный класс нажатой
-            e.target.style.backgroundColor = 'var(--accent-color)';
+            // Убираем класс active у всех кнопок
+            modelButtons.forEach(btn => btn.classList.remove('active'));
+            // Добавляем нажатой кнопке
+            e.target.classList.add('active');
             
-            // Здесь в будущем будем менять картинку модели (src у .model-img)
-            console.log(`Выбран образ: ${e.target.innerText}`);
+            // Получаем ссылку на картинку из data-src и меняем главное изображение
+            const newImageSrc = e.target.getAttribute('data-src');
+            
+            // Простая анимация исчезновения и появления
+            mainModel.style.opacity = 0;
+            setTimeout(() => {
+                mainModel.src = newImageSrc;
+                mainModel.style.opacity = 1;
+            }, 200); // 200мс на смену
         });
     });
 });
