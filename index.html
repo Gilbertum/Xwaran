@@ -3,41 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VTuber Name - Официальный сайт</title>
+    <title>Xwaran (Хворь) - Официальный сайт</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Навигация -->
     <header class="navbar">
-        <div class="logo">KIRA</div>
+        <div class="logo">
+            <img src="https://wertigo.ru/shared-files/f6f5dc1e-bff1-46e5-8dd6-8b010393d0e8" alt="Xwaran Logo">
+        </div>
         <nav>
-            <a href="#about">Обо мне</a>
-            <a href="#gallery">Галерея</a>
-            <a href="#schedule">Стримы</a>
-            <a href="#archive">Архив игр</a>
+            <a href="#info">Инфо</a>
+            <a href="#streams">Стримы</a>
+            <a href="#events">Ивенты</a>
+            <a href="#rules">Правила</a>
+            <a href="#roles">Роли</a>
         </nav>
         <div class="status-badge offline" id="stream-status">
             <span class="indicator"></span> ОФФЛАЙН
         </div>
     </header>
 
-    <!-- Главный экран -->
-    <section class="hero" id="about">
+    <!-- Главный экран и Переключатель образов -->
+    <section class="hero">
         <div class="character-container">
-            <!-- Сюда потом добавим интерактивную Live2D модель или статичный арт -->
-            <img src="8098cab8-64b4-4296-894a-c7ce8e515022_image.png" alt="VTuber Model" class="model-img">
+            <!-- По умолчанию стоит стандартная стримерская модель -->
+            <img src="https://wertigo.ru/shared-files/830e8402-db0a-4265-8ce3-6aa1575d28df" alt="Xwaran Model" id="main-model" class="model-img">
         </div>
         <div class="info-container">
-            <h1>Привет, я [Имя Витубера]!</h1>
-            <p>Cyber-Kitsune Guardian Spirit... (здесь будет ваш лор)</p>
-            <div class="theme-switcher">
-                <button class="btn">Киберпанк Урбан</button>
-                <button class="btn">Эфирная Церемония</button>
+            <h1>Привет, я Хворь!</h1>
+            <p>Добро пожаловать в мой уютный уголок. Выбери образ:</p>
+            
+            <!-- Кнопки для переключения PNG моделек -->
+            <div class="theme-switcher" id="model-switcher">
+                <button class="btn active" data-src="https://wertigo.ru/shared-files/830e8402-db0a-4265-8ce3-6aa1575d28df">Стрим-модель</button>
+                <button class="btn" data-src="https://wertigo.ru/shared-files/345b7d93-0b34-41e0-9c0e-499283d6d692">В платье</button>
+                <button class="btn" data-src="https://wertigo.ru/shared-files/56e92a13-63a4-4302-8a4e-4bccf92bf658">Пижамка</button>
+                <button class="btn" data-src="https://wertigo.ru/shared-files/7feda364-719e-4e0a-8cd1-6c3a4707f007">Чиби</button>
+                <button class="btn" data-src="https://wertigo.ru/shared-files/ea3df58e-5875-46b6-b5d2-889469ea3584">С повязкой</button>
             </div>
         </div>
     </section>
 
-    <!-- Здесь будут следующие секции (Расписание, Галерея и т.д.) -->
-<script src="main.js"></script>
+    <!-- Секция Инфо -->
+    <section id="info" class="content-section">
+        <img src="https://wertigo.ru/shared-files/b0cfefa1-3a0b-425b-bbaa-d7958012aff5" alt="Info Banner" class="section-banner">
+        <div class="section-content">
+            <p>Здесь мы потом разместим твой лор, реф-лист и основные факты.</p>
+        </div>
+    </section>
+
+    <!-- Секция Стримы (Календарь) -->
+    <section id="streams" class="content-section">
+        <img src="https://wertigo.ru/shared-files/a51241a8-33ba-4911-955b-1802b267998f" alt="Streams Banner" class="section-banner">
+        <div class="section-content">
+            <p>Место под динамическое расписание (Firebase).</p>
+        </div>
+    </section>
+
+    <!-- Секция Ивенты -->
+    <section id="events" class="content-section">
+        <img src="https://wertigo.ru/shared-files/058691e7-5bb8-440e-b79f-231515ab9bc2" alt="Events Banner" class="section-banner">
+        <div class="section-content">
+            <p>Розыгрыши, сабголы и интерактивы.</p>
+        </div>
+    </section>
+
+    <!-- Галерея Артов -->
+    <section id="gallery" class="content-section">
+        <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;">ГАЛЕРЕЯ</h2>
+        <div class="art-grid">
+            <img src="https://wertigo.ru/shared-files/6f556895-a7c9-4092-9ce4-3de4b51c70c1" alt="Art 1">
+            <img src="https://wertigo.ru/shared-files/64428cd5-e54d-435e-a04a-80f1864c5a27" alt="Art 2">
+            <img src="https://wertigo.ru/shared-files/fbe0725b-a0aa-484b-b95c-1e69f5b410ba" alt="Art 3">
+            <img src="https://wertigo.ru/shared-files/58d7129a-ebe7-416f-ace7-028d76b6f0b4" alt="Art 4">
+        </div>
+    </section>
+
 </body>
 </html>
