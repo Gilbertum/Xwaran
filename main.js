@@ -31,4 +31,30 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 200); // 200мс на смену
         });
     });
-});
+
+      // 3. Логика галереи (Раскрытие картинок)
+    const modal = document.getElementById("image-modal");
+    const modalImg = document.getElementById("expanded-img");
+    const closeModal = document.querySelector(".close-modal");
+    
+    // Выбираем все картинки в сетке галереи
+    const galleryImages = document.querySelectorAll(".art-grid img");
+    
+    galleryImages.forEach(img => {
+        img.addEventListener("click", function() {
+            modal.style.display = "block";
+            modalImg.src = this.src;
+        });
+    });
+    
+    // Закрытие по крестику
+    closeModal.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+    
+    // Закрытие по клику в любом месте фона
+    modal.addEventListener("click", (e) => {
+        if(e.target === modal) {
+            modal.style.display = "none";
+        }
+    });
