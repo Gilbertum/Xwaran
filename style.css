@@ -1,8 +1,7 @@
-/* Базовые настройки и темная тема */
 :root {
     --bg-color: #0d0d12;
     --text-color: #f0f0f0;
-    --accent-color: #ff3366; /* Цвет для кнопок и акцентов */
+    --accent-color: #ff3366;
     --nav-bg: #1a1a24;
 }
 
@@ -35,10 +34,11 @@ body {
     color: var(--accent-color);
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    letter-spacing: 2px;
+/* Логотип 30px */
+.logo img {
+    height: 30px; 
+    width: auto;
+    object-fit: contain;
 }
 
 /* Статус стрима */
@@ -56,11 +56,11 @@ body {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #555; /* Серый для оффлайна */
+    background-color: #555;
 }
 
 .status-badge.live .indicator {
-    background-color: #ff3333; /* Красный для лайва */
+    background-color: #ff3333;
     box-shadow: 0 0 10px #ff3333;
 }
 
@@ -78,12 +78,13 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 650px; /* Фиксированная минимальная высота */
+    min-height: 650px; 
+}
 
 .model-img {
-    max-height: 650px; /* Ограничиваем высоту */
+    max-height: 650px;
     object-fit: contain;
-    transition: opacity 0.2s ease-in-out; /* Плавное исчезновение */
+    transition: opacity 0.2s ease-in-out;
 }
 
 .info-container {
@@ -91,29 +92,28 @@ body {
     padding: 40px;
 }
 
+.theme-switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
 .btn {
     background-color: transparent;
     color: var(--text-color);
     border: 1px solid var(--accent-color);
     padding: 10px 20px;
-    margin-right: 10px;
     border-radius: 5px;
     cursor: pointer;
     transition: 0.3s;
 }
 
-.btn:hover {
+.btn:hover, .btn.active {
     background-color: var(--accent-color);
 }
 
-/* Логотип в шапке (увеличен в 2 раза) */
-.logo img {
-    height: 30px; 
-    width: auto;
-    object-fit: contain;
-}
-
-/* Стили для секций контента */
+/* Секции контента и баннеры */
 .content-section {
     padding: 60px 20px;
     max-width: 1200px;
@@ -123,7 +123,6 @@ body {
     align-items: center;
 }
 
-/* Баннеры секций */
 .section-banner {
     max-width: 100%;
     height: auto;
@@ -134,13 +133,23 @@ body {
 
 .section-content {
     width: 100%;
-    background: #1a1a24;
+    background: var(--nav-bg);
     padding: 30px;
     border-radius: 10px;
     text-align: center;
 }
 
-/* Сетка для галереи артов */
+/* Галерея */
+.gallery-subtitle {
+    width: 100%;
+    text-align: center;
+    font-size: 1.5em;
+    margin: 40px 0 20px 0;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 .art-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -159,28 +168,6 @@ body {
 
 .art-grid img:hover {
     transform: scale(1.03);
-}
-
-/* Активная кнопка переключателя */
-.btn.active {
-    background-color: var(--accent-color);
-}
-.theme-switcher {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-/* Новая галерея и ссылки */
-.gallery-subtitle {
-    width: 100%;
-    text-align: center;
-    font-size: 1.5em;
-    margin: 40px 0 20px 0;
-    color: var(--accent-color);
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .art-card {
@@ -213,7 +200,7 @@ body {
     top: 0;
     width: 100%; 
     height: 100%; 
-    background-color: rgba(0,0,0,0.85); /* Полупрозрачный темный фон */
+    background-color: rgba(0,0,0,0.85); 
     backdrop-filter: blur(5px);
 }
 
