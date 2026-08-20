@@ -108,7 +108,7 @@ body {
 
 /* Логотип в шапке (увеличен в 2 раза) */
 .logo img {
-    height: 80px; 
+    height: 30px; 
     width: auto;
     object-fit: contain;
 }
