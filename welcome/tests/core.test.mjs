@@ -1,0 +1,11 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {normalizeLogin,validLogin,parseRules,pickGreeting,renderGreeting,normalizeRule,streamSentKey,DEFAULT_RULES} from '../welcome/core.mjs';
+test('TWITCH логины регистронезависимы',()=>{assert.equal(normalizeLogin('@Hell_Fox_X'),'hell_fox_x');assert.equal(validLogin('Hell_Fox_X'),true);assert.equal(validLogin('киса'),false);});
+test('preloaded rules always disabled',()=>{assert.ok(DEFAULT_RULES.length>=3);assert.ok(DEFAULT_RULES.every(x=>!x.enabled));});
+test('template renders viewer with user placeholder',()=>{assert.equal(renderGreeting('Привет, {user}!','Fox_12'),'Привет, Fox_12!');assert.equal(renderGreeting('Привет, {USER}!','X'),'Привет, X!');});
+test('duplicate usernames are rejected',()=>assert.throws(()=>parseRules([{login:'fox_1',message:'hi',enabled:true},{login:'FOX_1',message:'ok',enabled:true}])));
+test('prototype pollution and script tags not evaluated by rules parser',()=>{const r=normalizeRule({login:'fox_1',message:'<script>alert(1)</script>',enabled:true});assert.equal(r.message,'<script>alert(1)</script>');assert.equal(r.login,'fox_1');});
+test('pickGreeting only once for same stream, only if enabled',()=>{let r=[{login:'fox_1',message:'Привет, {user}',enabled:true}];const event={chatter_user_login:'FOX_1',chatter_user_name:'Fox_1'};assert.equal(pickGreeting(event,r,new Set(),'stream-1').text,'Привет, Fox_1');assert.equal(pickGreeting(event,r,new Set(['fox_1']),'stream-1'),null);assert.equal(pickGreeting(event,r,new Set(),''),null);r[0].enabled=false;assert.equal(pickGreeting(event,r,new Set(),'stream-1'),null);});
+test('import normalizes and caps message length',()=>{const r=parseRules({rules:[{login:'fox_1',message:'x'.repeat(900),enabled:true}]});assert.equal(r[0].message.length,500);});
+test('sent keys are stream-specific',()=>{assert.notEqual(streamSentKey('1','stream-1'),streamSentKey('1','stream-2'));});
