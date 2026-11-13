@@ -8,8 +8,8 @@
   <meta name="description" content="Xwaran Welcome — персональные автоматические приветствия в Twitch без Streamer.bot.">
   <title>Xwaran Welcome — приветствия Twitch</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=1.1">
-  <script type="module" src="./app.mjs?v=1.1"></script>
+  <link rel="stylesheet" href="./styles.css?v=1.2">
+  <script type="module" src="./app.mjs?v=1.2"></script>
 </head>
 <body>
 <div class="shell">
@@ -17,11 +17,11 @@
     <div class="brand"><span class="brand-mark">X<span>✦</span></span><div><b>XWARAN</b><small>STUDIO / TOOLS</small></div></div>
     <div class="side-section">МОЙ ИНСТРУМЕНТ</div>
     <a class="nav-item active" href="#rules">✦ &nbsp; Приветствия <span id="sideCount">0</span></a>
-    <a class="nav-item" href="#connection">◈ &nbsp; Подключение</a>
+    <a class="nav-item" href="./settings.html">◈ &nbsp; Настройки Twitch</a>
     <a class="nav-item" href="#activity">▤ &nbsp; Журнал событий</a>
     <a class="nav-item" href="#backup">⇅ &nbsp; Резервные копии</a>
     <div class="side-note"><span class="tiny-dot"></span><b>Без Streamer.bot</b><p>Сайт работает в браузере, пока открыта вкладка и активна связь с Twitch.</p></div>
-    <div class="side-footer">XWARAN WELCOME <span>v1.1</span></div>
+    <div class="side-footer">XWARAN WELCOME <span>v1.2</span></div>
   </aside>
   <main class="main">
     <header class="topbar"><span class="eyebrow">TWITCH / ИНСТРУМЕНТЫ</span><div class="topbar-right"><span id="connectionPill" class="pill disconnected"><span class="dot"></span> Не подключено</span><span class="avatar">X</span></div></header>
@@ -30,7 +30,7 @@
       <div class="hero-stats">
         <div class="stat"><span>ВСЕГО ПРИВЕТСТВИЙ</span><div id="totalRules">0</div><small>В личном списке</small></div>
         <div class="stat"><span>АКТИВНЫЕ ПРАВИЛА</span><div id="enabledRules">0</div><small>Будут отправляться</small></div>
-        <div class="stat"><span>НА ЭТОМ СТРИМЕ</span><div id="sentCount">0</div><small>Успешно отправлено</small></div>
+        <div class="stat"><span>ЗА ТЕКУЩУЮ СЕССИЮ</span><div id="sentCount">0</div><small>Успешно отправлено</small></div>
         <div class="stat streamstat"><span>СТАТУС ТРАНСЛЯЦИИ</span><div id="streamStatus">Не проверено</div><small id="streamDetail">Подключи Twitch</small></div>
       </div>
       <section class="banner" id="connection">
@@ -38,30 +38,19 @@
         <div class="banner-text"><b id="bannerTitle">Подключи свой Twitch-аккаунт</b><p id="bannerText">Для отправки приветствий от твоего имени нужно один раз создать Twitch-приложение и авторизоваться.</p></div>
         <button id="connectBtn" class="btn accent">Настроить Twitch ↗</button>
       </section>
-      <section class="setup card" id="setupPanel">
-        <div class="section-heading"><div><h2>Подключение Twitch</h2><p>Без пароля, токена в коде и платных сервисов.</p></div><button id="setupClose" class="icon-btn" aria-label="Скрыть подключение">✕</button></div>
-        <div class="setup-grid">
-          <div class="setup-instructions"><div class="step"><b>01</b><div>Открой <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener noreferrer">Twitch Developer Console ↗</a> и зарегистрируй приложение, если его ещё нет.</div></div>
-          <div class="step"><b>02</b><div>Выбери тип приложения <strong>Public</strong>, а в OAuth Redirect URLs добавь <strong>точно</strong> следующий адрес:</div></div>
-          <div class="copyline"><code id="redirectUri"></code><button id="copyRedirect" class="btn subtle small">Копировать</button></div>
-          <div class="step"><b>03</b><div>Скопируй <strong>Client ID</strong> из настроек Twitch. <strong>Client Secret не нужен</strong> — нигде его не вводи.</div></div>
-          <div class="step"><b>04</b><div>Вставь Client ID ниже и нажми «Войти через Twitch». На странице Twitch разреши чтение и отправку сообщений от твоего аккаунта.</div></div></div>
-          <div class="setup-actions"><label for="clientId">CLIENT ID ПРИЛОЖЕНИЯ</label><input id="clientId" type="text" spellcheck="false" autocomplete="off" placeholder="Вставь Client ID" maxlength="80"><button id="authorizeBtn" class="btn primary wide">Войти через Twitch ↗</button><button id="disconnectBtn" class="btn subtle wide" hidden>Отключить аккаунт</button><p id="authInfo" class="fine">Токен хранится только в этой вкладке браузера и удаляется при отключении.</p><p class="fine">Разрешения: <code>user:read:chat</code> и <code>user:write:chat</code>.</p></div>
-        </div>
-      </section>
       <section class="card list-card" id="rules">
-        <div class="section-heading"><div><h2>Персональные приветствия <span class="count-tag" id="rulesCounter">0</span></h2><p>Сообщение отправляется после первого замеченного сообщения выбранного зрителя за стрим.</p></div><div class="actions"><label class="search-wrap"><span>⌕</span><input id="search" placeholder="Найти зрителя..." autocomplete="off"></label></div></div>
-        <div class="notice"><span>ⓘ</span><div>По умолчанию все примеры отключены. Автоматика работает <strong>только когда открыта вкладка и нажата кнопка «Запустить»</strong>. Не показывай панель на стриме: здесь находятся настройки подключения.</div></div>
+        <div class="section-heading"><div><h2>Персональные приветствия <span class="count-tag" id="rulesCounter">0</span></h2><p>Приветствие отправляется при первом замеченном сообщении зрителя за сессию — даже когда канал офлайн.</p></div><div class="actions"><label class="search-wrap"><span>⌕</span><input id="search" placeholder="Найти зрителя..." autocomplete="off"></label></div></div>
+        <div class="notice"><span>ⓘ</span><div>По умолчанию все примеры отключены. Автоматика работает <strong>только когда открыта вкладка и нажата кнопка «Запустить»</strong>. Настройки Twitch вынесены на отдельную страницу.</div></div>
         <div class="table-wrap"><table><thead><tr><th>ЗРИТЕЛЬ</th><th>ПЕРСОНАЛЬНЫЙ ОТВЕТ</th><th>АКТИВНО</th><th>ДЕЙСТВИЯ</th></tr></thead><tbody id="rulesBody"></tbody></table></div>
         <div id="emptyState" class="empty" hidden>Никого не найдено. Добавь зрителя или измени поиск.</div>
         <div class="table-footer"><span id="tableFoot">0 записей</span><button class="link-button" id="addBottom">＋ Добавить приветствие</button></div>
       </section>
       <div class="two-col">
-        <section class="card control-card"><div class="section-heading"><div><h2>Управление эфиром</h2><p>Отправка начинается только по твоей команде.</p></div></div>
+        <section class="card control-card"><div class="section-heading"><div><h2>Управление приветствиями</h2><p>Можно запустить в эфире или в офлайн-чате.</p></div></div>
           <div class="run-status"><span id="runIndicator" class="live-bullet"></span><div><strong id="runTitle">Автоматика остановлена</strong><small id="runSub">Подключи Twitch, чтобы начать</small></div></div>
           <div class="controls"><button id="startBtn" class="btn primary wide" disabled>▶ Запустить приветствия</button><button id="stopBtn" class="btn danger-outline" disabled>■ Остановить</button></div>
           <div class="settings-row"><label for="cooldown">Пауза между приветствиями</label><select id="cooldown"><option value="10">10 секунд</option><option value="15" selected>15 секунд</option><option value="20">20 секунд</option><option value="30">30 секунд</option></select></div>
-          <p class="fine">Повторные сообщения того же зрителя не вызывают новое приветствие. Список отправок сохраняется отдельно для каждой Twitch-трансляции.</p>
+          <p class="fine">Повторные сообщения того же зрителя не вызывают новое приветствие. Один ответ на зрителя за одну запущенную сессию. Остановка и повторный запуск начинают новую сессию.</p>
         </section>
         <section class="card" id="activity"><div class="section-heading"><div><h2>Последние события</h2><p>Соединение, найденные зрители и отправленные сообщения.</p></div><button id="clearLog" class="btn subtle small">Очистить</button></div><div id="eventLog" class="event-log"><div class="log-empty">Здесь появятся события после запуска</div></div></section>
       </div>
