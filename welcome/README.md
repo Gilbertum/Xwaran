@@ -60,3 +60,8 @@ node --test tests/core.test.mjs
 ## API
 
 Документация: [Twitch OAuth](https://dev.twitch.tv/docs/authentication/getting-tokens-oauth), [EventSub WebSockets](https://dev.twitch.tv/docs/eventsub/handling-websocket-events), [Chat message subscription](https://dev.twitch.tv/docs/eventsub/reference/chat), [Send Chat Message](https://dev.twitch.tv/docs/api/reference/chat).
+
+
+## Импорт Twir.app (v1.1)
+
+Все 22 приветствия с двух скриншотов добавлены в начальный набор, новые — выключены по умолчанию. При открытии сайта в том же браузере автоматически и единожды добавляются отсутствующие 14 правил, исходные тексты v1.0 заменяются на текст Twir.app только если они ещё не редактировались вручную. Персональные изменения, переключатели и намеренно удалённые записи из первой версии сохраняются. Правила, как и раньше, сохраняются в локальном хранилище браузера: для переноса между устройствами нужна функция экспорта/импорта.
