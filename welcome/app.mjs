@@ -1,4 +1,4 @@
-import {RULES_KEY,CLIENT_ID_KEY,COOLDOWN_KEY,DEFAULT_RULES,normalizeLogin,validLogin,normalizeRule,parseRules,pickGreeting,streamSentKey,renderGreeting} from './core.mjs';
+import {RULES_KEY,CLIENT_ID_KEY,COOLDOWN_KEY,DEFAULT_RULES,TWIR_IMPORT_KEY,mergeTwirRules,normalizeLogin,validLogin,normalizeRule,parseRules,pickGreeting,streamSentKey,renderGreeting} from './core.mjs?v=1.1';
 
 const $=id=>document.getElementById(id);
 const S={rules:[],clientId:'',token:null,expiresAt:0,userId:'',userLogin:'',streamId:'',live:false,started:false,starting:false,ws:null,reconnectWs:null,sentUsers:new Set(),queuedUsers:new Set(),queue:[],sending:false,lastSent:0,pollTimer:null,retryTimer:null,retryCount:0,editing:null,logs:[],lockRelease:null,lockHeld:false,stopping:false,clientTabId:crypto.randomUUID(),seenMessages:new Set(),seenMessageOrder:[]};
@@ -9,7 +9,28 @@ const API='https://api.twitch.tv/helix';
 function toast(text){const t=$('toast');t.textContent=text;t.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('visible'),5000);}
 function log(message,type='info'){const d=new Date();S.logs.unshift({message,type,date:d});S.logs=S.logs.slice(0,80);renderLog();}
 function renderLog(){const target=$('eventLog');target.replaceChildren();if(!S.logs.length){const empty=document.createElement('div');empty.className='log-empty';empty.textContent='Здесь появятся события после запуска';target.append(empty);return;}for(const e of S.logs.slice(0,35)){const item=document.createElement('div');item.className='log-item';const icon=document.createElement('span');icon.className='log-icon';icon.textContent=e.type==='success'?'✓':e.type==='error'?'!':'✦';const span=document.createElement('span');span.textContent=e.message;const time=document.createElement('time');time.textContent=e.date.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});item.append(icon,span,time);target.append(item);}}
-function loadSettings(){try{const v=localStorage.getItem(RULES_KEY);S.rules=v?parseRules(JSON.parse(v)):DEFAULT_RULES.map(r=>({...r}));}catch(e){S.rules=DEFAULT_RULES.map(r=>({...r}));log('Ошибка чтения настроек: показаны исходные примеры','error');}S.clientId=localStorage.getItem(CLIENT_ID_KEY)||'';$('clientId').value=S.clientId;const cooldown=localStorage.getItem(COOLDOWN_KEY);if(['10','15','20','30'].includes(cooldown))$('cooldown').value=cooldown;}
+function loadSettings(){
+ try{
+  const raw=localStorage.getItem(RULES_KEY);
+  S.rules=raw?parseRules(JSON.parse(raw)):DEFAULT_RULES.map(r=>({...r}));
+  if(localStorage.getItem(TWIR_IMPORT_KEY)!=='1'){
+   let added=0,updated=0;
+   if(raw){const merge=mergeTwirRules(S.rules);S.rules=merge.rules;added=merge.added;updated=merge.updated;}
+   // Store the migration marker alongside the new list. This prevents a manually
+   // deleted Twir rule from returning on a later reload.
+   localStorage.setItem(RULES_KEY,JSON.stringify(S.rules));
+   localStorage.setItem(TWIR_IMPORT_KEY,'1');
+   if(added||updated)log(`Перенос Twir.app: добавлено ${added}, обновлено ${updated}; пользовательские настройки сохранены.`,'success');
+  }
+ }catch(e){
+  S.rules=DEFAULT_RULES.map(r=>({...r}));
+  log('Ошибка чтения или сохранения настроек: показаны примеры Twir.app. Проверь хранилище браузера.','error');
+ }
+ S.clientId=localStorage.getItem(CLIENT_ID_KEY)||'';
+ $('clientId').value=S.clientId;
+ const cooldown=localStorage.getItem(COOLDOWN_KEY);
+ if(['10','15','20','30'].includes(cooldown))$('cooldown').value=cooldown;
+}
 function saveRules(){localStorage.setItem(RULES_KEY,JSON.stringify(S.rules));renderRules();renderStats();}
 function renderStats(){$('totalRules').textContent=String(S.rules.length);$('enabledRules').textContent=String(S.rules.filter(r=>r.enabled).length);$('sentCount').textContent=String(S.sentUsers.size);$('sideCount').textContent=String(S.rules.length);$('rulesCounter').textContent=String(S.rules.length);$('tableFoot').textContent=`${S.rules.length} записей · ${S.rules.filter(r=>r.enabled).length} включено`;
  $('streamStatus').textContent=S.live?'В эфире':S.userId?'Не в эфире':'Не проверено';$('streamDetail').textContent=S.live?'Twitch подтвердил активный эфир':S.userId?'Отправка выключена вне эфира':'Подключи Twitch';}
