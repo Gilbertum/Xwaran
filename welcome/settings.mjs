@@ -1,4 +1,4 @@
-import {CLIENT_ID_KEY} from './core.mjs?v=1.2';
+import {CLIENT_ID_KEY} from './core.mjs?v=1.3';
 const $=id=>document.getElementById(id);
 const AUTH_TOKEN_KEY='xw_welcome_twitch_token';
 const AUTH_EXP_KEY='xw_welcome_twitch_expires';
@@ -9,13 +9,14 @@ function status(connected,text){$('connectionPill').className='pill '+(connected
 async function refreshAuth(){
  const token=sessionStorage.getItem(AUTH_TOKEN_KEY);
  const expiry=Number(sessionStorage.getItem(AUTH_EXP_KEY)||0);
- if(!token||expiry<Date.now()+30000){status(false,'Не подключено');$('authInfo').textContent='Twitch не подключён. Авторизуйся, чтобы отправлять приветствия от своего аккаунта.';$('disconnectBtn').hidden=true;return;}
+ if(!token||expiry<Date.now()+30000){$('nativeScopeStatus').textContent='Потребуется разрешение на официальные Twitch Shoutout.';status(false,'Не подключено');$('authInfo').textContent='Twitch не подключён. Авторизуйся, чтобы отправлять приветствия от своего аккаунта.';$('disconnectBtn').hidden=true;return;}
  try{
   const res=await fetch('https://id.twitch.tv/oauth2/validate',{headers:{Authorization:'OAuth '+token},cache:'no-store'});
   if(!res.ok)throw new Error('Токен Twitch просрочен.');
   const data=await res.json();
   if(data.client_id!==localStorage.getItem(CLIENT_ID_KEY))throw Error('Client ID не совпадает с текущим приложением.');
   status(true,'@'+data.login);
+  $('nativeScopeStatus').textContent=data.scopes?.includes('moderator:manage:shoutouts')?'Нативные шотауты с кнопкой Follow разрешены.':'Чтобы включить кнопку Follow во время эфира, нажми «Войти через Twitch» повторно и подтверди новое разрешение.';
   $('authInfo').textContent='Подключено: @'+data.login+'. Авторизация действительна до '+new Date(expiry).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+' (время браузера).';
   $('disconnectBtn').hidden=false;
  }catch(e){status(false,'Требуется повторный вход');$('authInfo').textContent=e.message+' Нажми «Войти через Twitch».';$('disconnectBtn').hidden=false;}
@@ -26,7 +27,7 @@ function authorize(){
  localStorage.setItem(CLIENT_ID_KEY,id);
  const state=crypto.randomUUID()+crypto.randomUUID();
  sessionStorage.setItem(AUTH_STATE_KEY,state);
- const q=new URLSearchParams({response_type:'token',client_id:id,redirect_uri:redirectUri,scope:'user:read:chat user:write:chat',state,force_verify:'true'});
+ const q=new URLSearchParams({response_type:'token',client_id:id,redirect_uri:redirectUri,scope:'user:read:chat user:write:chat moderator:manage:shoutouts',state,force_verify:'true'});
  location.assign('https://id.twitch.tv/oauth2/authorize?'+q.toString());
 }
 function disconnect(){
