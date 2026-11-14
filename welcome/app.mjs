@@ -1,5 +1,6 @@
-import {RULES_KEY,CLIENT_ID_KEY,COOLDOWN_KEY,DEFAULT_RULES,TWIR_IMPORT_KEY,mergeTwirRules,normalizeLogin,validLogin,normalizeRule,parseRules,pickGreeting} from './core.mjs?v=1.3';
-import {SHOUT_RULES_KEY,SHOUT_HISTORY_KEY,SHOUT_INTERVAL_KEY,DEFAULT_SHOUTS,DEFAULT_SHOUT_TEXT,normalizeShoutRule,parseShoutRules,renderShoutText,matchShout,cleanHistory,chooseShoutMethod,remainingShoutCooldown,stampShout} from './shoutouts.mjs?v=1.3';
+import {RULES_KEY,CLIENT_ID_KEY,COOLDOWN_KEY,DEFAULT_RULES,TWIR_IMPORT_KEY,mergeTwirRules,normalizeLogin,validLogin,normalizeRule,parseRules,pickGreeting} from './core.mjs?v=1.4';
+import {SHOUT_RULES_KEY,SHOUT_HISTORY_KEY,SHOUT_INTERVAL_KEY,DEFAULT_SHOUTS,DEFAULT_SHOUT_TEXT,parseShoutRules,renderShoutText,matchShout,cleanHistory,chooseShoutMethod,remainingShoutCooldown,stampShout} from './shoutouts.mjs?v=1.4';
+import {combineProfiles,putProfile,removeProfile,toggleProfile,DEFAULT_GREETING_TEXT} from './profiles.mjs?v=1.4';
 
 const $=id=>document.getElementById(id);
 const S={rules:[],clientId:'',token:null,expiresAt:0,userId:'',userLogin:'',streamId:'',sessionId:'',live:false,started:false,starting:false,ws:null,reconnectWs:null,sentUsers:new Set(),queuedUsers:new Set(),queue:[],sending:false,lastSent:0,pollTimer:null,retryTimer:null,retryCount:0,editing:null,logs:[],lockRelease:null,lockHeld:false,stopping:false,clientTabId:crypto.randomUUID(),seenMessages:new Set(),seenMessageOrder:[],shoutRules:[],shoutEditing:null,shoutSent:new Set(),shoutQueued:new Set(),shoutQueue:[],sendingShout:false,shoutGeneration:0,shoutHistory:cleanHistory({}),hasNativeScope:false,chatSendChain:Promise.resolve()};
@@ -35,48 +36,73 @@ function loadSettings(){
  const cooldown=localStorage.getItem(COOLDOWN_KEY);
  if(['10','15','20','30'].includes(cooldown))$('cooldown').value=cooldown;
 }
-function saveShoutRules(){localStorage.setItem(SHOUT_RULES_KEY,JSON.stringify(S.shoutRules));renderShoutRules();renderShoutStats();}
+/** Both legacy storage keys remain unchanged, so no saved personal message is lost. */
+function saveProfiles(){
+ try{
+  localStorage.setItem(RULES_KEY,JSON.stringify(S.rules));
+  localStorage.setItem(SHOUT_RULES_KEY,JSON.stringify(S.shoutRules));
+ }catch(e){log('Не удалось сохранить правила: '+e.message,'error');toast('Не получилось сохранить: проверь хранилище браузера.');}
+ renderRules();renderStats();
+}
 function renderShoutStats(){
- $('shoutTotal').textContent=String(S.shoutRules.length);$('shoutEnabled').textContent=String(S.shoutRules.filter(r=>r.enabled).length);
- $('shoutSent').textContent=String(S.shoutSent.size);$('sideShoutCount').textContent=String(S.shoutRules.length);
- $('shoutCount').textContent=String(S.shoutRules.length);
- $('shoutFoot').textContent=`${S.shoutRules.length} стримеров · ${S.shoutRules.filter(r=>r.enabled).length} включено`;
- $('nativeScopeNote').textContent=S.hasNativeScope?'Разрешение на нативный шотаут получено: во время эфира появится кнопка Follow.':'Для кнопки Follow в эфире переподключи Twitch в настройках. Пока будет отправляться текст со ссылкой.';
+ const note=$('nativeScopeNote');
+ if(note)note.textContent=S.hasNativeScope?'Кнопка Follow доступна во время эфира, если нет ограничений Twitch. Офлайн отправляется ссылка.':'Для официального Follow во время эфира переподключи Twitch в настройках; пока шотауты отправляются ссылкой.';
+ $('shoutEnabled').textContent=String(S.shoutRules.filter(r=>r.enabled).length);
 }
-function renderShoutRules(){
- const query=$('shoutSearch').value.trim().toLowerCase();const body=$('shoutBody');body.replaceChildren();let found=0;
- for(const rule of S.shoutRules){if(query&&!`${rule.login} ${rule.message}`.toLowerCase().includes(query))continue;found++;
-  const tr=document.createElement('tr'),user=document.createElement('td'),name=document.createElement('div');name.className='user-cell';
-  const avatar=document.createElement('span');avatar.className='user-avatar';avatar.textContent=rule.login[0].toUpperCase();const nick=document.createElement('span');nick.textContent=rule.login;name.append(avatar,nick);user.append(name);
-  const tdMessage=document.createElement('td'),msg=document.createElement('div');msg.className='message';msg.textContent=rule.message;msg.title=rule.message;tdMessage.append(msg);
-  const toggleCell=document.createElement('td'),label=document.createElement('label');label.className='switch';const ck=document.createElement('input');ck.type='checkbox';ck.checked=rule.enabled;ck.setAttribute('aria-label','Шотаут для '+rule.login);ck.onchange=()=>{rule.enabled=ck.checked;saveShoutRules();log(`Шотаут ${rule.login}: ${rule.enabled?'включён':'выключен'}`);};const track=document.createElement('span');label.append(ck,track);toggleCell.append(label);
-  const tdActions=document.createElement('td'),actions=document.createElement('div');actions.className='row-actions';
-  const preview=document.createElement('button');preview.className='mini-btn';preview.textContent='◉';preview.title='Предпросмотр текста';preview.setAttribute('aria-label','Предпросмотр '+rule.login);preview.onclick=()=>{const text=renderShoutText(rule.message,rule.login,rule.login);$('shoutPreviewText').textContent=text;$('shoutPreviewDialog').showModal();};
-  const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='✎';edit.title='Редактировать';edit.onclick=()=>openShoutDialog(rule);
-  const del=document.createElement('button');del.className='mini-btn danger';del.textContent='⌫';del.title='Удалить';del.onclick=()=>{if(confirm(`Удалить шотаут ${rule.login}?`)){S.shoutRules=S.shoutRules.filter(r=>r!==rule);saveShoutRules();}};
-  actions.append(preview,edit,del);tdActions.append(actions);tr.append(user,tdMessage,toggleCell,tdActions);body.append(tr);
+function renderStats(){
+ const profiles=combineProfiles(S.rules,S.shoutRules);
+ $('totalRules').textContent=String(profiles.length);
+ $('enabledRules').textContent=String(S.rules.filter(r=>r.enabled).length);
+ $('sideCount').textContent=String(profiles.length);
+ $('rulesCounter').textContent=String(profiles.length);
+ $('tableFoot').textContent=`${profiles.length} зрителей · ${S.rules.filter(r=>r.enabled).length} приветствий · ${S.shoutRules.filter(r=>r.enabled).length} шотаутов · отправлено за сессию ${S.sentUsers.size+S.shoutSent.size}`;
+ $('streamStatus').textContent=S.live?'В эфире':S.userId?'Офлайн':'Не проверено';
+ $('streamDetail').textContent=S.live?'Приветствия и Follow-шотауты доступны':S.userId?'Приветствия и ссылки работают офлайн':'Подключи Twitch';
+ renderShoutStats();
+}
+function renderRules(){
+ const query=$('search').value.trim().toLowerCase();const tbody=$('rulesBody');tbody.replaceChildren();let count=0;
+ for(const profile of combineProfiles(S.rules,S.shoutRules)){
+  if(query&&!`${profile.login} ${profile.greeting?.message||''} ${profile.shoutout?.message||''}`.toLowerCase().includes(query))continue;
+  count++;
+  const row=document.createElement('tr');
+  const tdUser=document.createElement('td'),div=document.createElement('div');div.className='user-cell';
+  const avatar=document.createElement('span');avatar.className='user-avatar';avatar.textContent=profile.login.slice(0,1).toUpperCase();
+  const user=document.createElement('span');user.textContent=profile.login;div.append(avatar,user);tdUser.append(div);
+  const tdText=document.createElement('td'),summaries=document.createElement('div');summaries.className='reaction-summaries';
+  const info=(tag,rule)=>{if(!rule)return;const line=document.createElement('div');line.className='reaction-preview';const name=document.createElement('b');name.textContent=tag;const text=document.createElement('span');text.textContent=rule.message;text.title=rule.message;line.append(name,text);summaries.append(line);};
+  info('✦',profile.greeting);info('↗',profile.shoutout);
+  if(!profile.greeting&&!profile.shoutout){const empty=document.createElement('span');empty.textContent='Нет настроенных действий';summaries.append(empty);}
+  tdText.append(summaries);
+  const makeToggle=(kind,checked)=>{const td=document.createElement('td');td.className='toggle-column';const label=document.createElement('label');label.className='switch';const input=document.createElement('input');input.type='checkbox';input.checked=checked;input.setAttribute('aria-label',`${kind==='greeting'?'Приветствие':'Шотаут'}: ${profile.login}`);input.onchange=()=>{try{const next=toggleProfile(S.rules,S.shoutRules,profile.login,kind,input.checked);S.rules=next.greetings;S.shoutRules=next.shoutouts;saveProfiles();log(`@${profile.login}: ${kind==='greeting'?'приветствие':'шотаут'} ${input.checked?'включён':'выключен'}`);}catch(e){toast(e.message);input.checked=!input.checked;}};const track=document.createElement('span');label.append(input,track);td.append(label);return td;};
+  const tdOn=makeToggle('greeting',Boolean(profile.greeting?.enabled));const tdShout=makeToggle('shoutout',Boolean(profile.shoutout?.enabled));
+  const tdActions=document.createElement('td');const actions=document.createElement('div');actions.className='row-actions';
+  const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='✎';edit.title='Редактировать обе реакции';edit.setAttribute('aria-label','Редактировать '+profile.login);edit.onclick=()=>openRuleDialog(profile);
+  const del=document.createElement('button');del.className='mini-btn danger';del.textContent='⌫';del.title='Удалить зрителя и обе реакции';del.setAttribute('aria-label','Удалить '+profile.login);del.onclick=()=>{if(!confirm(`Удалить @${profile.login} вместе с приветствием и шотаутом?`))return;const next=removeProfile(S.rules,S.shoutRules,profile.login);S.rules=next.greetings;S.shoutRules=next.shoutouts;saveProfiles();log(`@${profile.login}: удалён из списка`);};
+  actions.append(edit,del);tdActions.append(actions);row.append(tdUser,tdText,tdOn,tdShout,tdActions);tbody.append(row);
  }
- $('shoutEmpty').hidden=found!==0;
+ $('emptyState').hidden=count!==0;
 }
-function openShoutDialog(rule=null){S.shoutEditing=rule;$('shoutHeading').textContent=rule?'Редактировать шотаут':'Добавить стримера';$('shoutLogin').value=rule?.login||'';$('shoutText').value=rule?.message||DEFAULT_SHOUT_TEXT;$('shoutRuleEnabled').checked=rule?.enabled??false;$('shoutDialog').showModal();}
-function closeShoutDialog(){$('shoutDialog').close();S.shoutEditing=null;}
-function saveShoutDialog(e){e.preventDefault();let next;try{next=normalizeShoutRule({login:$('shoutLogin').value,message:$('shoutText').value,enabled:$('shoutRuleEnabled').checked});}catch(err){toast(err.message);return;}
- if(S.shoutRules.some(r=>r!==S.shoutEditing&&normalizeLogin(r.login)===normalizeLogin(next.login))){toast('Этот стример уже добавлен.');return;}
- if(S.shoutEditing)Object.assign(S.shoutEditing,next);else S.shoutRules.push(next);saveShoutRules();log('Правило шотаута сохранено: @'+next.login,'success');closeShoutDialog();}
-function showActiveView(){const tab=location.hash==='#shoutouts'?'shoutouts':'greetings';$('greetingsView').hidden=tab!=='greetings';$('shoutoutsView').hidden=tab!=='shoutouts';$('navGreetings').classList.toggle('active',tab==='greetings');$('navShoutouts').classList.toggle('active',tab==='shoutouts');}
-function saveRules(){localStorage.setItem(RULES_KEY,JSON.stringify(S.rules));renderRules();renderStats();}
-function renderStats(){$('totalRules').textContent=String(S.rules.length);$('enabledRules').textContent=String(S.rules.filter(r=>r.enabled).length);$('sentCount').textContent=String(S.sentUsers.size);$('sideCount').textContent=String(S.rules.length);$('rulesCounter').textContent=String(S.rules.length);$('tableFoot').textContent=`${S.rules.length} записей · ${S.rules.filter(r=>r.enabled).length} включено`;
- $('streamStatus').textContent=S.live?'В эфире':S.userId?'Офлайн':'Не проверено';$('streamDetail').textContent=S.live?'Приветствия и шотауты доступны':S.userId?'Текстовые шотауты работают офлайн':'Подключи Twitch';}
-function renderRules(){const query=$('search').value.trim().toLowerCase();const tbody=$('rulesBody');tbody.replaceChildren();let count=0;for(const rule of S.rules){if(query&&!`${rule.login} ${rule.message}`.toLowerCase().includes(query))continue;count++;
- const row=document.createElement('tr');const tdUser=document.createElement('td');const div=document.createElement('div');div.className='user-cell';const avatar=document.createElement('span');avatar.className='user-avatar';avatar.textContent=rule.login.slice(0,1).toUpperCase();const user=document.createElement('span');user.textContent=rule.login;div.append(avatar,user);tdUser.append(div);
- const tdText=document.createElement('td');const message=document.createElement('div');message.className='message';message.title=rule.message;message.textContent=rule.message;tdText.append(message);
- const tdOn=document.createElement('td');const label=document.createElement('label');label.className='switch';const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=rule.enabled;checkbox.setAttribute('aria-label','Приветствие '+rule.login);checkbox.addEventListener('change',()=>{rule.enabled=checkbox.checked;saveRules();log(`${rule.login}: ${rule.enabled?'включено':'выключено'}`);});const track=document.createElement('span');label.append(checkbox,track);tdOn.append(label);
- const tdActions=document.createElement('td');const actions=document.createElement('div');actions.className='row-actions';const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='✎';edit.title='Редактировать';edit.setAttribute('aria-label','Редактировать '+rule.login);edit.addEventListener('click',()=>openRuleDialog(rule));const del=document.createElement('button');del.className='mini-btn danger';del.textContent='⌫';del.title='Удалить';del.setAttribute('aria-label','Удалить '+rule.login);del.addEventListener('click',()=>{if(confirm(`Удалить приветствие для ${rule.login}?`)){S.rules=S.rules.filter(r=>r!==rule);saveRules();log(`${rule.login}: удалено`);}});actions.append(edit,del);tdActions.append(actions);row.append(tdUser,tdText,tdOn,tdActions);tbody.append(row);
- }$('emptyState').hidden=count!==0;}
-function openRuleDialog(rule=null){S.editing=rule;$('modalHeading').textContent=rule?'Редактировать приветствие':'Добавить зрителя';$('ruleLogin').value=rule?.login||'';$('ruleText').value=rule?.message||'Привет, {user}! Устраивайся поудобнее ✦';$('ruleEnabled').checked=rule?.enabled??true;updateCharacters();$('ruleDialog').showModal();setTimeout(()=>$('ruleLogin').focus(),10);}
+function updateCharacters(){$('charCounter').textContent=`${$('ruleText').value.length} / 500`;updateShoutPreview();}
+function updateShoutPreview(){const login=$('ruleLogin').value.trim().replace(/^@/,'')||'Streamer';try{$('shoutPreviewText').textContent=renderShoutText($('shoutText').value||DEFAULT_SHOUT_TEXT,login,login);}catch{$('shoutPreviewText').textContent='Здесь появится предпросмотр ссылки на канал';}}
+function openRuleDialog(profile=null){
+ S.editing=profile?.login||null;
+ $('modalHeading').textContent=profile?'Редактировать '+profile.login:'Добавить зрителя';
+ $('ruleLogin').value=profile?.login||'';
+ $('ruleText').value=profile?.greeting?.message||DEFAULT_GREETING_TEXT;
+ $('shoutText').value=profile?.shoutout?.message||DEFAULT_SHOUT_TEXT;
+ $('ruleEnabled').checked=profile?Boolean(profile.greeting?.enabled):true;
+ $('shoutRuleEnabled').checked=Boolean(profile?.shoutout?.enabled);
+ updateCharacters();$('ruleDialog').showModal();setTimeout(()=>$('ruleLogin').focus(),10);
+}
 function closeDialog(){$('ruleDialog').close();S.editing=null;}
-function updateCharacters(){$('charCounter').textContent=`${$('ruleText').value.length} / 500`;}
-function saveDialog(evt){evt.preventDefault();let rule;try{rule=normalizeRule({login:$('ruleLogin').value,message:$('ruleText').value,enabled:$('ruleEnabled').checked});}catch(err){toast(err.message);return;}if(S.rules.some(r=>r!==S.editing&&normalizeLogin(r.login)===normalizeLogin(rule.login))){toast('Этот зритель уже есть в списке.');return;}if(S.editing)Object.assign(S.editing,rule);else S.rules.push(rule);saveRules();log(`${rule.login}: приветствие сохранено`);closeDialog();}
+function saveDialog(evt){
+ evt.preventDefault();try{
+  const next=putProfile(S.rules,S.shoutRules,{login:$('ruleLogin').value,greetEnabled:$('ruleEnabled').checked,shoutEnabled:$('shoutRuleEnabled').checked,greetText:$('ruleText').value,shoutText:$('shoutText').value},S.editing);
+  S.rules=next.greetings;S.shoutRules=next.shoutouts;
+  saveProfiles();log('@'+$('ruleLogin').value.trim()+': реакции сохранены','success');closeDialog();
+ }catch(e){toast(e.message);}
+}
 function applySession(){const connected=Boolean(S.token&&S.userId);$('connectionPill').className='pill '+(connected?'connected':'disconnected');$('connectionPill').innerHTML='<span class="dot"></span>'; $('connectionPill').append(document.createTextNode(connected?` @${S.userLogin}`:' Не подключено'));
  $('bannerTitle').textContent=connected?`Twitch подключён: @${S.userLogin}`:'Подключи свой Twitch-аккаунт';$('bannerText').textContent=connected?'Приветствия и шотауты работают в одной вкладке. Без эфира отправляется ссылка, в эфире — Twitch Follow (при наличии разрешения).':'Чтобы отправлять сообщения от твоего аккаунта, настрой подключение на отдельной странице.';$('connectBtn').textContent=connected?'Настройки Twitch ↗':'Подключить Twitch ↗';renderRun();renderStats();renderShoutStats();}
 function renderRun(){const active=S.started;const pending=S.starting;$('runIndicator').className='live-bullet'+(active?' on':'');$('runTitle').textContent=active?'Автоматика работает':pending?'Подключение к чату...':'Автоматика остановлена';$('runSub').textContent=active?'Слушаем чат: приветствия и шотауты включённых зрителей':pending?'Ожидаем подтверждение Twitch':S.token?'Можно запускать даже когда канал офлайн':'Подключи Twitch в настройках';$('startBtn').disabled=!S.token||active||pending;$('startBtn').textContent=pending?'Подключаемся...':'▶ Запустить автоматику';$('stopBtn').disabled=!active&&!pending;}
@@ -101,11 +127,18 @@ function socketStart(url='wss://eventsub.wss.twitch.tv/ws',isReconnect=false){le
  ws.onerror=()=>{log('Ошибка соединения с чатом Twitch','error');};
  ws.onclose=()=>{clearTimeout(watchdog);if(S.stopping)return;if(isReconnect){if(S.reconnectWs===ws){S.reconnectWs=null;log('Не удалось перенести подключение, повторяем подключение','error');if(S.ws){S.ws.onclose=null;S.ws.close();S.ws=null;}reconnectLater();}return;}if(S.ws===ws){S.ws=null;if(S.started||S.starting){log('Соединение с чатом прервано. Переподключение...','error');S.started=false;S.starting=true;renderRun();reconnectLater();}}};}
 function reconnectLater(){clearTimeout(S.retryTimer);if(!S.token)return;const delay=Math.min(30000,1500*Math.pow(2,Math.min(S.retryCount++,5)));S.retryTimer=setTimeout(()=>{if(S.starting&&S.token)socketStart();},delay);}
-function handleChat(evt){if(!S.started||!S.sessionId||!evt)return;const mid=evt.message_id;if(mid){if(S.seenMessages.has(mid))return;S.seenMessages.add(mid);S.seenMessageOrder.push(mid);if(S.seenMessageOrder.length>500){S.seenMessages.delete(S.seenMessageOrder.shift());}}
- const login=normalizeLogin(evt.chatter_user_login);if(login===normalizeLogin(S.userLogin))return;
- const streamer=S.shoutRules.find(r=>r.enabled&&normalizeLogin(r.login)===login);
- if(streamer){const candidate=matchShout(evt,S.shoutRules,S.shoutSent);if(candidate)enqueueShout(candidate);return;}
- if(S.queuedUsers.has(login))return;const match=pickGreeting(evt,S.rules,S.sentUsers,S.sessionId);if(!match)return;if(S.queue.length>=40){log('Очередь приветствий переполнена, новое сообщение пропущено','error');return;}S.queuedUsers.add(login);S.queue.push(match);log(`${evt.chatter_user_name||login}: добавлено в очередь`);processQueue();}
+function handleChat(evt){
+ if(!S.started||!S.sessionId||!evt)return;
+ const mid=evt.message_id;if(mid){if(S.seenMessages.has(mid))return;S.seenMessages.add(mid);S.seenMessageOrder.push(mid);if(S.seenMessageOrder.length>500)S.seenMessages.delete(S.seenMessageOrder.shift());}
+ const login=normalizeLogin(evt.chatter_user_login);if(!login||login===normalizeLogin(S.userLogin))return;
+ // A viewer may independently receive greeting AND shoutout — neither suppresses the other.
+ if(!S.queuedUsers.has(login)){
+  const match=pickGreeting(evt,S.rules,S.sentUsers,S.sessionId);
+  if(match){if(S.queue.length>=40)log('Очередь приветствий переполнена','error');else{S.queuedUsers.add(login);S.queue.push(match);log(`@${login}: приветствие в очереди`);processQueue();}}
+ }
+ const shout=matchShout(evt,S.shoutRules,S.shoutSent);
+ if(shout)enqueueShout(shout);
+}
 function storeShoutHistory(){try{localStorage.setItem(SHOUT_HISTORY_KEY,JSON.stringify(S.shoutHistory));}catch{log('Не удалось сохранить историю шотаутов в браузере','error');}}
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function sendChat(text,session){
@@ -170,21 +203,38 @@ async function processQueue(){if(S.sending||!S.started||!S.sessionId||!S.token)r
  }}finally{S.sending=false;}}
 async function startBot(){if(S.started||S.starting)return;if(!S.token){toast('Сначала подключи Twitch.');return;}try{await validateToken(S.token);}catch(e){toast(e.message);return;}S.sessionId=crypto.randomUUID();S.sentUsers.clear();S.queuedUsers.clear();S.queue=[];S.shoutGeneration++;S.shoutSent.clear();S.shoutQueued.clear();S.shoutQueue=[];S.sendingShout=false;S.seenMessages.clear();S.seenMessageOrder=[];S.starting=true;S.stopping=false;renderStats();renderRun();
  if(navigator.locks?.request){navigator.locks.request('xwaran-welcome-one-active-tab',{mode:'exclusive',ifAvailable:true},async lock=>{if(!lock){S.starting=false;renderRun();toast('В другой вкладке уже запущены приветствия. Останови их там.');return;}S.lockHeld=true;socketStart();await new Promise(resolve=>{S.lockRelease=resolve;});S.lockHeld=false;}).catch(err=>{log('Не удалось установить защиту от двух вкладок: '+err.message,'error');stopBot();});}else{log('Браузер не поддерживает блокировку второй вкладки. Не запускай панель дважды.','error');socketStart();}}
-function exportRules(){const data={version:1,exportedAt:new Date().toISOString(),rules:S.rules};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='xwaran-welcome-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);log('Скачана резервная копия приветствий','success');}
-async function importRules(file){if(!file||file.size>1024*1024){toast('Файл не найден или слишком большой (макс. 1 МБ).');return;}try{const d=JSON.parse(await file.text());const incoming=parseRules(d);if(!confirm(`Заменить текущие ${S.rules.length} правил на ${incoming.length} из файла?`))return;S.rules=incoming;saveRules();log('Загружены правила из резервной копии','success');toast('Приветствия импортированы.');}catch(e){toast('Ошибка импорта: '+e.message);}}
-function exportShouts(){const data={version:1,exportedAt:new Date().toISOString(),shoutouts:S.shoutRules};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='xwaran-shoutouts-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);}
-async function importShouts(file){if(!file||file.size>1024*1024){toast('Файл слишком большой (максимум 1 МБ).');return;}try{const data=JSON.parse(await file.text());const list=parseShoutRules(data);if(!confirm(`Заменить ${S.shoutRules.length} шотаутов на ${list.length} из файла?`))return;S.shoutRules=list;saveShoutRules();toast('Шотауты импортированы.');}catch(e){toast('Ошибка файла: '+e.message);}}
+function exportRules(){
+ const data={version:2,exportedAt:new Date().toISOString(),rules:S.rules,shoutouts:S.shoutRules};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='xwaran-reactions-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+ log('Скачана резервная копия приветствий и шотаутов','success');
+}
+async function importRules(file){
+ if(!file||file.size>1024*1024){toast('Файл не найден или слишком большой (макс. 1 МБ).');return;}
+ try{
+  const raw=JSON.parse(await file.text());
+  const hasG=Array.isArray(raw)||Array.isArray(raw?.rules),hasS=Array.isArray(raw?.shoutouts);
+  if(!hasG&&!hasS)throw Error('Не найдены правила приветствий или шотаутов.');
+  const nextG=hasG?parseRules(raw):S.rules,nextS=hasS?parseShoutRules(raw):S.shoutRules;
+  const changes=[hasG?`${nextG.length} приветствий`:null,hasS?`${nextS.length} шотаутов`:null].filter(Boolean).join(' и ');
+  if(!confirm(`Импортировать ${changes}? Соответствующие старые списки будут заменены.`))return;
+  S.rules=nextG;S.shoutRules=nextS;saveProfiles();log('Импортированы реакции из резервной копии','success');toast('Правила загружены.');
+ }catch(e){toast('Ошибка импорта: '+e.message);}
+}
 function wire(){
- $('connectBtn').onclick=()=>{location.assign('./settings.html');};
- window.addEventListener('hashchange',showActiveView);
- $('addShoutBtn').onclick=()=>openShoutDialog();$('addShoutBottom').onclick=()=>openShoutDialog();
- $('shoutDialogClose').onclick=closeShoutDialog;$('cancelShout').onclick=closeShoutDialog;
- $('shoutForm').addEventListener('submit',saveShoutDialog);$('shoutSearch').oninput=renderShoutRules;
- $('shoutPreviewClose').onclick=()=>$('shoutPreviewDialog').close();
+ $('connectBtn').onclick=()=>location.assign('./settings.html');
+ $('addBtn').onclick=()=>openRuleDialog();$('addBottom').onclick=()=>openRuleDialog();
+ $('dialogClose').onclick=closeDialog;$('cancelRule').onclick=closeDialog;
+ $('ruleForm').addEventListener('submit',saveDialog);
+ $('ruleText').oninput=updateCharacters;$('shoutText').oninput=updateShoutPreview;$('ruleLogin').oninput=updateShoutPreview;
+ $('search').oninput=renderRules;
+ $('startBtn').onclick=startBot;$('stopBtn').onclick=()=>{stopBot();log('Автоматика остановлена');};
+ $('cooldown').onchange=()=>localStorage.setItem(COOLDOWN_KEY,$('cooldown').value);
  $('shoutInterval').onchange=()=>localStorage.setItem(SHOUT_INTERVAL_KEY,$('shoutInterval').value);
- $('exportShouts').onclick=exportShouts;$('importShouts').onclick=()=>$('shoutFile').click();$('shoutFile').onchange=e=>{importShouts(e.target.files?.[0]);e.target.value='';};
- $('addBtn').onclick=()=>openRuleDialog();$('addBottom').onclick=()=>openRuleDialog();$('dialogClose').onclick=closeDialog;$('cancelRule').onclick=closeDialog;$('ruleForm').addEventListener('submit',saveDialog);$('ruleText').oninput=updateCharacters;$('search').oninput=renderRules;
- $('startBtn').onclick=startBot;$('stopBtn').onclick=()=>{stopBot();log('Автоматика остановлена');};$('cooldown').onchange=()=>localStorage.setItem(COOLDOWN_KEY,$('cooldown').value);$('clearLog').onclick=()=>{S.logs=[];renderLog();};$('exportBtn').onclick=exportRules;$('importBtn').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>{importRules(e.target.files?.[0]);e.target.value='';};
- window.addEventListener('beforeunload',()=>{if(S.ws)S.ws.close();if(S.reconnectWs)S.reconnectWs.close();});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.token)refreshStream();});}
-async function init(){wire();loadSettings();renderRules();renderShoutRules();renderStats();renderShoutStats();showActiveView();applySession();await oauthCallback();if(!S.token)await restoreAuth();log('Панель готова. Приветствия и шотауты отключены до запуска.');}
+ $('clearLog').onclick=()=>{S.logs=[];renderLog();};
+ $('exportBtn').onclick=exportRules;$('importBtn').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>{importRules(e.target.files?.[0]);e.target.value='';};
+ window.addEventListener('beforeunload',()=>{if(S.ws)S.ws.close();if(S.reconnectWs)S.reconnectWs.close();});
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.token)refreshStream();});
+}
+async function init(){wire();loadSettings();renderRules();renderStats();applySession();await oauthCallback();if(!S.token)await restoreAuth();log('Панель готова. Приветствия и шотауты отключены до запуска.');}
 init().catch(err=>{log('Ошибка запуска панели: '+err.message,'error');toast('Ошибка запуска: '+err.message);});
