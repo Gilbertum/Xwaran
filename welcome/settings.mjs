@@ -1,4 +1,4 @@
-import {CLIENT_ID_KEY} from './core.mjs?v=1.3';
+import {CLIENT_ID_KEY} from './core.mjs?v=1.4';
 const $=id=>document.getElementById(id);
 const AUTH_TOKEN_KEY='xw_welcome_twitch_token';
 const AUTH_EXP_KEY='xw_welcome_twitch_expires';

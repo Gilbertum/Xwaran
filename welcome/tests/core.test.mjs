@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeLogin,validLogin,parseRules,pickGreeting,renderGreeting,normalizeRule,streamSentKey,DEFAULT_RULES,mergeTwirRules,LEGACY_DEFAULT_MESSAGES} from '../welcome/core.mjs';
+import {normalizeLogin,validLogin,parseRules,pickGreeting,renderGreeting,normalizeRule,streamSentKey,DEFAULT_RULES,mergeTwirRules,LEGACY_DEFAULT_MESSAGES} from '../core.mjs';
 test('TWITCH логины регистронезависимы',()=>{assert.equal(normalizeLogin('@Hell_Fox_X'),'hell_fox_x');assert.equal(validLogin('Hell_Fox_X'),true);assert.equal(validLogin('киса'),false);});
 test('preloaded rules always disabled',()=>{assert.ok(DEFAULT_RULES.length>=3);assert.ok(DEFAULT_RULES.every(x=>!x.enabled));});
 test('template renders viewer with user placeholder',()=>{assert.equal(renderGreeting('Привет, {user}!','Fox_12'),'Привет, Fox_12!');assert.equal(renderGreeting('Привет, {USER}!','X'),'Привет, X!');});
