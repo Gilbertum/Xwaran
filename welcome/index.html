@@ -8,8 +8,8 @@
   <meta name="description" content="Xwaran Welcome — персональные приветствия и шотауты Twitch в одном месте.">
   <title>Xwaran Welcome — персональные реакции Twitch</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=1.4">
-  <script type="module" src="./app.mjs?v=1.4"></script>
+  <link rel="stylesheet" href="./styles.css?v=1.5">
+  <script type="module" src="./app.mjs?v=1.5"></script>
 </head>
 <body>
 <div class="shell">
@@ -21,7 +21,7 @@
     <a class="nav-item" href="#activity">▤ &nbsp; Журнал событий</a>
     <a class="nav-item" href="#backup">⇅ &nbsp; Резервные копии</a>
     <div class="side-note"><span class="tiny-dot"></span><b>Без Streamer.bot</b><p>Сайт работает в браузере, пока открыта вкладка и активна связь с Twitch.</p></div>
-    <div class="side-footer">XWARAN WELCOME <span>v1.4</span></div>
+    <div class="side-footer">XWARAN WELCOME <span>v1.5</span></div>
   </aside>
   <main class="main">
     <header class="topbar"><span class="eyebrow">TWITCH / ИНСТРУМЕНТЫ</span><div class="topbar-right"><span id="connectionPill" class="pill disconnected"><span class="dot"></span> Не подключено</span><span class="avatar">X</span></div></header>
@@ -31,19 +31,19 @@
         <div class="banner-text"><b id="bannerTitle">Подключи свой Twitch-аккаунт</b><p id="bannerText">Для отправки сообщений от твоего имени нужно один раз создать Twitch-приложение и авторизоваться.</p></div>
         <button id="connectBtn" class="btn accent">Настроить Twitch ↗</button>
       </section>
-      <section class="page-title"><div><div class="eyebrow red">ЗАМЕТИТЬ СВОИХ · ПОДДЕРЖАТЬ СТРИМЕРОВ</div><h1>Персональные реакции<span class="spark">✦</span></h1><p>Один зритель — приветствие, шотаут или сразу оба действия.</p></div><button id="addBtn" class="btn primary">＋ Добавить зрителя</button></section>
+      <section class="page-title"><div><div class="eyebrow red">ЗАМЕТИТЬ СВОИХ · ПОДДЕРЖАТЬ СТРИМЕРОВ</div><h1>Персональные реакции<span class="spark">✦</span></h1><p>Один зритель — одно сообщение. Шотаут включается отдельно.</p></div><button id="addBtn" class="btn primary">＋ Добавить зрителя</button></section>
       <div class="hero-stats">
         <div class="stat"><span>ВСЕГО ЗРИТЕЛЕЙ</span><div id="totalRules">0</div><small>Без повторяющихся ников</small></div>
-        <div class="stat"><span>ВКЛЮЧЕНО ПРИВЕТСТВИЙ</span><div id="enabledRules">0</div><small>Персональные сообщения</small></div>
-        <div class="stat"><span>ВКЛЮЧЕНО ШОТАУТОВ</span><div id="shoutEnabled">0</div><small>Поддержка стримеров</small></div>
+        <div class="stat"><span>АКТИВНЫЕ СООБЩЕНИЯ</span><div id="enabledRules">0</div><small>Всегда одно сообщение на зрителя</small></div>
+        <div class="stat"><span>ВКЛЮЧЕНО ШОТАУТОВ</span><div id="shoutEnabled">0</div><small>Ссылка + Follow в эфире</small></div>
         <div class="stat streamstat"><span>СТАТУС ТРАНСЛЯЦИИ</span><div id="streamStatus">Не проверено</div><small id="streamDetail">Подключи Twitch</small></div>
       </div>
       <section class="card list-card" id="rules">
         <div id="shoutouts" class="compat-anchor" aria-hidden="true"></div>
-        <div class="section-heading"><div><h2>Мои зрители <span class="count-tag" id="rulesCounter">0</span></h2><p>Измени обе реакции в одном окне. Отключённые правила сохраняют свои тексты.</p></div><label class="search-wrap"><span>⌕</span><input id="search" placeholder="Найти ник или текст..." autocomplete="off"></label></div>
-        <div class="notice"><span>ⓘ</span><div><b>Приветствие</b> — сообщение от Xwaran. <b>Шотаут</b> — официальный Follow во время эфира или текст со ссылкой офлайн. При включённых обоих правилах выполнятся <b>оба действия</b> (текстовые сообщения с паузой). Вкладка сайта должна быть открыта, а автоматика — запущена.</div></div>
+        <div class="section-heading"><div><h2>Мои зрители <span class="count-tag" id="rulesCounter">0</span></h2><p>Один текст на зрителя и дополнительный переключатель шотаута. Настройки сохраняются.</p></div><label class="search-wrap"><span>⌕</span><input id="search" placeholder="Найти ник или текст..." autocomplete="off"></label></div>
+        <div class="notice"><span>ⓘ</span><div><b>Одно сообщение</b> отправляется при первом замеченном сообщении выбранного зрителя. Если включён <b>шотаут</b>, ссылка на канал добавляется прямо в этот же текст, а во время эфира сайт дополнительно вызывает Twitch Follow (когда это разрешено). Второго сообщения от Xwaran не будет. Вкладка должна оставаться открытой.</div></div>
         <p id="nativeScopeNote" class="native-scope-info">Для официального Follow-шотаута нужно разрешение Twitch.</p>
-        <div class="table-wrap"><table class="profiles-table"><thead><tr><th>ЗРИТЕЛЬ</th><th>НАСТРОЕННЫЕ РЕАКЦИИ</th><th>ПРИВЕТСТВИЕ</th><th>ШОТАУТ</th><th>ДЕЙСТВИЯ</th></tr></thead><tbody id="rulesBody"></tbody></table></div>
+        <div class="table-wrap"><table class="profiles-table"><thead><tr><th>ЗРИТЕЛЬ</th><th>ТЕКСТ СООБЩЕНИЯ</th><th>АКТИВНО</th><th>ШОТАУТ</th><th>ДЕЙСТВИЯ</th></tr></thead><tbody id="rulesBody"></tbody></table></div>
         <div id="emptyState" class="empty" hidden>Зрители не найдены. Добавь нового или измени запрос.</div>
         <div class="table-footer"><span id="tableFoot">0 зрителей</span><button class="link-button" id="addBottom">＋ Добавить зрителя</button></div>
       </section>
@@ -51,12 +51,12 @@
         <section class="card control-card"><div class="section-heading"><div><h2>Управление автоматикой</h2><p>Одно соединение Twitch для приветствий и шотаутов — онлайн и офлайн.</p></div></div>
           <div class="run-status"><span id="runIndicator" class="live-bullet"></span><div><strong id="runTitle">Автоматика остановлена</strong><small id="runSub">Подключи Twitch, чтобы начать</small></div></div>
           <div class="controls"><button id="startBtn" class="btn primary wide" disabled>▶ Запустить автоматику</button><button id="stopBtn" class="btn danger-outline" disabled>■ Остановить</button></div>
-          <div class="settings-row"><label for="cooldown">Пауза между приветствиями</label><select id="cooldown"><option value="10">10 секунд</option><option value="15" selected>15 секунд</option><option value="20">20 секунд</option><option value="30">30 секунд</option></select></div>
-          <div class="settings-row"><label for="shoutInterval">Минимальная пауза между шотаутами</label><select id="shoutInterval"><option value="60">60 секунд</option><option value="90" selected>90 секунд</option><option value="120">120 секунд</option></select></div><p class="fine">Twitch Follow показывается только во время эфира. Текстовые шотауты доступны офлайн; повтор одному стримеру ограничен 30 минутами. Повторные сообщения того же зрителя не вызывают новое приветствие. Один ответ на зрителя за одну запущенную сессию. Остановка и повторный запуск начинают новую сессию.</p>
+          <div class="settings-row"><label for="cooldown">Пауза между сообщениями</label><select id="cooldown"><option value="10">10 секунд</option><option value="15" selected>15 секунд</option><option value="20">20 секунд</option><option value="30">30 секунд</option></select></div>
+          <p class="fine">В чат отправляется только один текст на зрителя за запущенную сессию. При выбранном шотауте ссылка входит в него же. Официальная кнопка Twitch Follow доступна только во время эфира (лимиты Twitch: один раз в 2 минуты, одному стримеру — раз в 60 минут); офлайн работает ссылка.</p>
         </section>
         <section class="card" id="activity"><div class="section-heading"><div><h2>Последние события</h2><p>Соединение, найденные зрители и отправленные сообщения.</p></div><button id="clearLog" class="btn subtle small">Очистить</button></div><div id="eventLog" class="event-log"><div class="log-empty">Здесь появятся события после запуска</div></div></section>
       </div>
-      <section class="card backup-card" id="backup"><div class="section-heading"><div><h2>Резервная копия</h2><p>Единый JSON: все приветствия и шотауты вместе. Настройки остаются в твоём браузере.</p></div></div><div class="backup-buttons"><button id="exportBtn" class="btn subtle">↓ Скачать все реакции (.json)</button><button id="importBtn" class="btn subtle">↑ Загрузить реакции (.json)</button><input id="fileInput" type="file" accept=".json,application/json" hidden></div></section>
+      <section class="card backup-card" id="backup"><div class="section-heading"><div><h2>Резервная копия</h2><p>В JSON сохраняются единые сообщения, режим Follow и резервные старые настройки. Данные остаются в браузере.</p></div></div><div class="backup-buttons"><button id="exportBtn" class="btn subtle">↓ Скачать настройки (.json)</button><button id="importBtn" class="btn subtle">↑ Импортировать настройки (.json)</button><input id="fileInput" type="file" accept=".json,application/json" hidden></div></section>
       <footer>✦ XWARAN STUDIO — НЕЗАВИСИМАЯ ПАНЕЛЬ • TWITCH EVENTSUB • GITHUB PAGES</footer>
     </div>
   </main>
@@ -64,11 +64,16 @@
 <dialog id="ruleDialog" class="modal profile-modal"><form method="dialog" id="ruleForm">
   <div class="modal-title"><div><div class="eyebrow red">ПЕРСОНАЛЬНЫЕ РЕАКЦИИ</div><h2 id="modalHeading">Настроить зрителя</h2></div><button id="dialogClose" class="icon-btn" type="button" aria-label="Закрыть">✕</button></div>
   <label for="ruleLogin">TWITCH-НИК ЗРИТЕЛЯ</label><input id="ruleLogin" placeholder="например, Hell_Fox_X" required maxlength="25" spellcheck="false" autocomplete="off">
-  <p class="fine">Один Twitch-ник, до двух независимых реакций. Ник вводится без @.</p>
-  <section class="reaction-editor" aria-labelledby="greetEditorTitle"><div class="reaction-switch-line"><div><strong id="greetEditorTitle">✦ Приветствие</strong><span>Отправить персональный текст в чат</span></div><label class="switch"><input id="ruleEnabled" type="checkbox" aria-label="Включить приветствие"><span></span></label></div>
-  <label for="ruleText">ТЕКСТ ПРИВЕТСТВИЯ</label><textarea id="ruleText" rows="3" maxlength="500" placeholder="Привет, {user}! Устраивайся поудобнее ✦"></textarea><div class="form-under"><span>Переменная <code>{user}</code></span><span id="charCounter">0 / 500</span></div></section>
-  <section class="reaction-editor" aria-labelledby="shoutEditorTitle"><div class="reaction-switch-line"><div><strong id="shoutEditorTitle">↗ Шотаут</strong><span>Во время эфира — Twitch Follow; офлайн — ссылка</span></div><label class="switch"><input id="shoutRuleEnabled" type="checkbox" aria-label="Включить шотаут"><span></span></label></div>
-  <label for="shoutText">ТЕКСТ ШОТАУТА (ДЛЯ ОФЛАЙНА И РЕЗЕРВА)</label><textarea id="shoutText" rows="3" maxlength="450" placeholder="Поддержите {user}! {url}"></textarea><p class="fine">Можно использовать <code>{user}</code>, <code>{login}</code>, <code>{url}</code>. Ссылка добавится автоматически, если её нет.</p><div id="shoutPreviewText" class="preview-shout" aria-live="polite"></div></section>
+  <p class="fine">Ник вводится без @. Для каждого зрителя предусмотрено только одно сообщение.</p>
+  <section class="reaction-editor" aria-labelledby="greetEditorTitle">
+    <div class="reaction-switch-line"><div><strong id="greetEditorTitle">✦ Отправлять сообщение</strong><span>Текст отправится один раз за сессию</span></div><label class="switch"><input id="ruleEnabled" type="checkbox" aria-label="Активировать сообщение"><span></span></label></div>
+    <label for="ruleText">ТЕКСТ СООБЩЕНИЯ</label><textarea id="ruleText" rows="3" maxlength="500" placeholder="Привет, {user}! Устраивайся поудобнее ✦"></textarea>
+    <div class="form-under"><span>Переменные: <code>{user}</code>, <code>{login}</code>, <code>{url}</code></span><span id="charCounter">0 / 500</span></div>
+    <div class="preview-shout" id="messagePreview" aria-live="polite"></div>
+  </section>
+  <section class="reaction-editor" aria-labelledby="shoutEditorTitle"><div class="reaction-switch-line"><div><strong id="shoutEditorTitle">↗ Дополнительно: шотаут</strong><span>В том же тексте появится ссылка; в эфире — Twitch Follow</span></div><label class="switch"><input id="shoutRuleEnabled" type="checkbox" aria-label="Отправлять шотаут вместе с сообщением"><span></span></label></div>
+    <p class="fine">Второго текстового сообщения не будет. Twitch Follow зависит от статуса эфира и ограничений платформы.</p>
+  </section>
   <div class="dialog-actions"><button type="button" id="cancelRule" class="btn subtle">Отмена</button><button type="submit" class="btn primary">Сохранить</button></div>
 </form></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
