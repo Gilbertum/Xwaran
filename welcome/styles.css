@@ -3,7 +3,7 @@
 .settings-warning{margin:0 0 20px}.setup{margin-bottom:24px}.page-title .btn{display:inline-flex;align-items:center}.settings-warning b{color:#d9c8d1}
 
 .view[hidden]{display:none!important}.native-scope-info{margin:0 24px 18px;padding:12px 14px;color:#b7aeba;font-size:12px;background:#201c27;border:1px solid #3c3140;border-radius:8px}.preview-shout{font-size:14px;line-height:1.8;background:#252029;border:1px solid #523343;color:#fff0f4;border-radius:8px;padding:18px;overflow-wrap:anywhere}.shout-stats .streamstat>div{font-size:22px}.list-card .section-heading{flex-wrap:wrap;row-gap:12px}@media(max-width:780px){.native-scope-info{margin:0 14px 16px}}
-/* v1.4 unified viewer rules */
+/* v1.5 single message per viewer */
 .profiles-table{min-width:840px;table-layout:fixed}
 .profiles-table th,.profiles-table td{vertical-align:middle}
 .profiles-table th:first-child,.profiles-table td:first-child{width:20%}
